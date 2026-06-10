@@ -492,7 +492,7 @@
       const path = document.getElementById('snake-path');
       const h = section.offsetHeight; const w = section.offsetWidth;
       path.setAttribute('d', `M ${w/2} 0 C ${w-50} ${h*0.25} 50 ${h*0.4} ${w/2} ${h*0.6} C ${w-50} ${h*0.8} 50 ${h*0.9} ${w/2} ${h}`);
-c
+
       gsap.to("#winding-heart", {
         scrollTrigger: { trigger: "#scratch-section", start: "top center", end: "bottom bottom", scrub: 5 },
         motionPath: { path: "#snake-path", align: "#snake-path", alignOrigin: [0.5, 0.5] }, ease: "none"
