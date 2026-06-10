@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Special Gift - Journey of Us</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      background-color: #050204;
+      color: #fbcfe8;
+      margin: 0;
+    }
+    .font-serif-lux { font-family: 'Playfair Display', serif; }
+    .font-romantic { font-family: 'Great Vibes', cursive; }
+    
+    .no-scroll { overflow: hidden; height: 100vh; }
+    
+    .bg-dark-pink { background: linear-gradient(135deg, #050204 0%, #1a050d 50%, #050204 100%); }
+
+    /* Glassmorphism Premium */
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.15);
+    }
+
+    /* Kado Getar & Glow */
+    .animate-gift-shake { animation: giftShake 2s infinite cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes giftShake {
+      0%, 100% { transform: rotate(0) scale(1); }
+      10%, 30%, 50%, 70% { transform: rotate(-8deg) scale(1.1); }
+      20%, 40%, 60% { transform: rotate(8deg) scale(1.1); }
+      80% { transform: rotate(0) scale(1); }
+    }
+    .gift-glow { filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.7)); }
+
+    /* Spark / Kunang-kunang */
+    .firefly {
+      position: absolute;
+      border-radius: 50%;
+      background-color: #fce7f3;
+      box-shadow: 0 0 10px 2px rgba(244, 114, 182, 0.8), 0 0 20px 4px rgba(236, 72, 153, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Hujan Bunga Global */
+    #falling-petals-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Taman Bunga SVG */
+    #garden-svg { width: 100%; height: 100%; overflow: visible; }
+    .glowing-flower { filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.8)); }
+
+    /* Galeri Mosaik (DIPERBESAR) */
+    .mosaic-photo {
+      position: absolute;
+      width: 120px; height: 120px; /* Diperbesar agar lebih terlihat */
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid rgba(236, 72, 153, 0.6);
+      box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+      opacity: 0;
+      cursor: pointer;
+      transition: z-index 0.2s, box-shadow 0.2s ease;
+    }
+    .mosaic-photo:hover {
+      z-index: 40 !important;
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.7) !important;
+    }
+
+    /* Galeri Gosok */
+    .scratch-container {
+      position: relative;
+      width: 100%; height: 300px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+    }
+    .scratch-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+    .scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; touch-action: none; cursor: pointer; }
+
+    /* Bintang Parallax Meliuk */
+    #winding-heart {
+      position: absolute;
+      width: 40px; height: 40px;
+      z-index: 30;
+      pointer-events: none;
+      filter: drop-shadow(0 0 15px #f472b6);
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body class="no-scroll bg-dark-pink text-pink-100">
+
+  <div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 hidden flex flex-col items-center justify-center opacity-0 transition-opacity duration-300 cursor-pointer">
+    <img id="lightbox-img" src="" class="max-w-[90%] max-h-[80%] rounded-2xl border-2 border-pink-500 shadow-[0_0_30px_rgba(236,72,153,0.8)] object-contain">
+    <p class="text-pink-300 mt-6 tracking-widest text-sm animate-pulse">Ketuk untuk menutup</p>
+  </div>
+
+  <canvas id="falling-petals-canvas"></canvas>
+
+  <audio id="bg-music" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+  <button id="music-control" class="hidden fixed bottom-6 right-6 z-50 bg-[#be185d] text-white p-3 rounded-full shadow-[0_4px_20px_rgba(236,72,153,0.5)] border border-pink-400 hover:scale-110 active:scale-95 transition-transform">
+    <i data-lucide="music" class="w-6 h-6"></i>
+  </button>
+
+  <section id="cover-section" class="fixed inset-0 z-40 flex flex-col items-center justify-center px-6 overflow-hidden bg-black/40 backdrop-blur-sm">
+    <div id="cover-guest" class="z-10 flex flex-col items-center justify-center w-full">
+      <div class="flex flex-col items-center justify-center cursor-pointer group" onclick="document.getElementById('btn-open').click()">
+        <div class="relative animate-gift-shake gift-glow group-hover:scale-110 transition-transform duration-300">
+          <div class="bg-gradient-to-br from-[#db2777] to-[#831843] p-12 md:p-20 rounded-3xl shadow-2xl border border-pink-400/50 text-white">
+            <i data-lucide="gift" class="w-32 h-32 md:w-48 md:h-48"></i>
+          </div>
+          <span class="absolute -top-4 -right-4 flex h-6 w-6">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-6 w-6 bg-pink-500 border border-black"></span>
+          </span>
+        </div>
+        <div class="inline-block mt-10 px-6 py-2 rounded-full bg-white/5 border border-pink-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(236,72,153,0.2)]">
+          <p class="text-sm md:text-base uppercase tracking-[0.5em] text-pink-300 font-bold">A Special Gift For You</p>
+        </div>
+      </div>
+    </div>
+    <button id="btn-open" class="hidden">Buka</button>
+    <div id="cover-header" class="hidden"></div>
+  </section>
+
+  <div id="transition-overlay" class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center overflow-hidden hidden bg-[#050204]/0">
+    <div id="flower-container" class="relative w-full h-full"></div>
+  </div>
+
+  <main id="main-section" class="relative hidden">
+    
+    <section id="hero-garden" class="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center">
+      <div id="fireflies-container" class="absolute inset-0 pointer-events-none z-0"></div>
+
+      <div id="garden-text" class="z-20 text-center opacity-0 px-6 max-w-2xl transform -translate-y-10">
+        <div class="glassmorphism p-8 md:p-12 rounded-3xl relative">
+          <i data-lucide="sparkles" class="absolute top-4 right-4 w-6 h-6 text-pink-400 opacity-50"></i>
+          <h2 class="font-romantic text-5xl md:text-6xl text-pink-300 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)] mb-4">Untukmu yang Teristimewa</h2>
+          <p class="font-serif-lux text-pink-100/90 leading-relaxed text-sm md:text-base italic">
+            "Sama seperti bunga-bunga ini yang tumbuh dan bermekaran dalam keheningan, begitu pula perasaanku. Tidak peduli seberapa jauh jarak atau waktu, setiap kenangan bersamamu selalu memiliki tempat bercahaya di sudut terdalam hatiku."
+          </p>
+        </div>
+        <p class="text-pink-300/50 text-[10px] tracking-[0.4em] mt-8 uppercase animate-pulse">Scroll Kebawah</p>
+      </div>
+
+      <div class="absolute bottom-0 inset-x-0 h-[70vh] z-10 pointer-events-none">
+        <svg id="garden-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax meet"></svg>
+      </div>
+      <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#050204] to-transparent z-20"></div>
+    </section>
+
+    <section id="mosaic-section" class="relative w-full h-screen flex flex-col items-center justify-center z-20 py-20 overflow-hidden">
+      
+      <div id="mosaic-trigger-area" class="z-30 text-center flex flex-col items-center justify-center transition-all duration-500">
+        <h3 class="font-serif-lux text-3xl text-pink-300 mb-8">Ada Sesuatu Untukmu...</h3>
+        <div id="btn-explode" class="relative animate-gift-shake gift-glow cursor-pointer hover:scale-110 transition-transform duration-300">
+          <div class="bg-gradient-to-br from-[#831843] to-[#4a044e] p-6 rounded-full shadow-2xl border border-pink-400/50 text-white">
+            <i data-lucide="package-open" class="w-10 h-10"></i>
+          </div>
+          <p class="text-[10px] text-pink-300 mt-4 font-semibold tracking-[0.2em] uppercase animate-pulse">Buka Hati Ini</p>
+        </div>
+      </div>
+
+      <div id="mosaic-container" class="absolute inset-0 w-full h-full pointer-events-none flex items-center justify-center z-20">
+        </div>
+    </section>
+
+    <section id="scratch-section" class="relative max-w-4xl mx-auto px-6 py-32 z-20">
+      <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="motion-path-svg">
+        <path id="snake-path" fill="none" stroke="rgba(236,72,153,0.2)" stroke-width="2" stroke-dasharray="10 10" d=""/>
+      </svg>
+
+      <div id="winding-heart" class="flex items-center justify-center">
+        <i data-lucide="heart" class="w-8 h-8 text-pink-400 fill-pink-500 animate-pulse"></i>
+        <span class="absolute w-full h-full rounded-full bg-pink-500/30 blur-md animate-ping"></span>
+      </div>
+
+      <div class="text-center mb-20 relative z-20">
+        <h3 class="font-romantic text-5xl text-pink-300">Uncover the Memories</h3>
+        <p class="text-pink-200/60 text-sm mt-2">Gosok gambar di bawah ini untuk mengulang momen kita</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-30">
+        <div class="scratch-card">
+          <div class="scratch-container">
+            <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop" class="scratch-image">
+            <canvas class="scratch-canvas"></canvas>
+          </div>
+          <div class="mt-4 text-center"><h4 class="font-serif-lux text-xl text-pink-200">Momen Pertama</h4></div>
+        </div>
+        <div class="scratch-card md:mt-24">
+          <div class="scratch-container">
+            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop" class="scratch-image">
+            <canvas class="scratch-canvas"></canvas>
+          </div>
+          <div class="mt-4 text-center"><h4 class="font-serif-lux text-xl text-pink-200">Langkah Bersama</h4></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 text-center z-20 relative px-4 pb-32">
+      <i data-lucide="heart" class="w-10 h-10 text-pink-500 fill-pink-500 mx-auto animate-gift-shake mb-4 gift-glow"></i>
+      <h3 class="font-romantic text-6xl text-pink-300 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]">I Love You</h3>
+    </section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+    gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+    // ================= LIGHTBOX LOGIC =================
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+
+    function openLightbox(imgSrc) {
+      lightboxImg.src = imgSrc;
+      lightbox.classList.remove('hidden');
+      // Fade in effect
+      setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
+      document.body.style.overflow = 'hidden'; // Kunci scroll saat foto terbuka
+    }
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.add('opacity-0');
+      setTimeout(() => { 
+        lightbox.classList.add('hidden'); 
+        document.body.style.overflow = 'auto'; // Buka scroll kembali
+      }, 300);
+    });
+
+    // ================= AUDIO CONTROL =================
+    const audio = document.getElementById('bg-music');
+    const musicBtn = document.getElementById('music-control');
+    let isMusicPlaying = false;
+
+    function playMusic() {
+      audio.play().then(() => {
+        isMusicPlaying = true;
+        musicBtn.classList.remove('hidden');
+        musicBtn.innerHTML = `<i data-lucide="music" class="w-6 h-6 animate-pulse"></i>`;
+        lucide.createIcons();
+      }).catch(() => console.log("Audio play blocked."));
+    }
+
+    musicBtn.addEventListener('click', () => {
+      if (isMusicPlaying) { audio.pause(); isMusicPlaying = false; musicBtn.innerHTML = `<i data-lucide="music-4" class="w-6 h-6 opacity-50"></i>`; }
+      else { audio.play(); isMusicPlaying = true; musicBtn.innerHTML = `<i data-lucide="music" class="w-6 h-6 animate-pulse"></i>`; }
+      lucide.createIcons();
+    });
+
+    // ================= CANVAS HUJAN BUNGA =================
+    const petalCanvas = document.getElementById('falling-petals-canvas');
+    const petalCtx = petalCanvas.getContext('2d');
+    let petals = [];
+    
+    function resizePetalCanvas() {
+      petalCanvas.width = window.innerWidth; petalCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizePetalCanvas);
+    resizePetalCanvas();
+
+    class Petal {
+      constructor() {
+        this.x = Math.random() * petalCanvas.width; this.y = Math.random() * petalCanvas.height - petalCanvas.height;
+        this.w = Math.random() * 6 + 4; this.h = Math.random() * 4 + 3;
+        this.vy = Math.random() * 1.5 + 0.5; this.vx = Math.random() * 1 - 0.5;
+        this.angle = Math.random() * 360; this.spin = (Math.random() - 0.5) * 5;
+        this.color = `rgba(244, 114, 182, ${Math.random() * 0.5 + 0.3})`;
+      }
+      update() {
+        this.y += this.vy; this.x += this.vx; this.angle += this.spin;
+        if (this.y > petalCanvas.height) { this.y = -10; this.x = Math.random() * petalCanvas.width; }
+      }
+      draw() {
+        petalCtx.save(); petalCtx.translate(this.x, this.y); petalCtx.rotate(this.angle * Math.PI / 180);
+        petalCtx.fillStyle = this.color; petalCtx.beginPath(); petalCtx.ellipse(0, 0, this.w, this.h, 0, 0, Math.PI * 2);
+        petalCtx.fill(); petalCtx.restore();
+      }
+    }
+    for(let i=0; i<80; i++) petals.push(new Petal());
+    function loopPetals() {
+      petalCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height);
+      petals.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(loopPetals);
+    }
+    loopPetals();
+
+    // ================= TRANSISI MAWAR =================
+    function generateTransitionFlowers() {
+      const container = document.getElementById('flower-container');
+      for(let i = 0; i < 49; i++) {
+        const wrapper = document.createElement('div'); wrapper.classList.add('transition-rose', 'absolute', 'origin-center');
+        wrapper.innerHTML = `<img src="https://images.unsplash.com/photo-1562690868-60bbe7293e94?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover rounded-full mix-blend-screen">`;
+        gsap.set(wrapper, {
+          left: `calc(${(i % 7) * (100 / 6)}% + ${(Math.random()-0.5)*10}%)`, top: `calc(${Math.floor(i / 7) * (100 / 6)}% + ${(Math.random()-0.5)*10}%)`,
+          width: `calc(${Math.random() * 10 + 15}vw + 30px)`, height: `calc(${Math.random() * 10 + 15}vw + 30px)`,
+          xPercent: -50, yPercent: -50, scale: 0, opacity: 0, rotation: Math.random() * 360, zIndex: Math.floor(Math.random() * 50)
+        });
+        container.appendChild(wrapper);
+      }
+    }
+
+    // ================= KUNANG-KUNANG =================
+    function initFireflies() {
+      const container = document.getElementById('fireflies-container');
+      for(let i=0; i<30; i++) {
+        const f = document.createElement('div'); f.classList.add('firefly');
+        gsap.set(f, { width: Math.random() * 4 + 2, height: Math.random() * 4 + 2, left: `${Math.random()*100}vw`, top: `${Math.random()*100}vh`, opacity: 0 });
+        container.appendChild(f);
+        function animate() {
+          gsap.to(f, {
+            x: `+=${Math.random()*100-50}`, y: `+=${Math.random()*100-50}`,
+            opacity: Math.random()*0.8+0.2, duration: Math.random()*3+2, ease: "sine.inOut",
+            onComplete: () => { gsap.to(f, { opacity: 0, duration: Math.random()*2, onComplete: animate }); }
+          });
+        }
+        setTimeout(animate, Math.random()*2000);
+      }
+    }
+
+    // ================= GENERATOR TAMAN SVG =================
+    function buildGardenSVG() {
+      const svg = document.getElementById('garden-svg'); svg.innerHTML = '';
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `<linearGradient id="pink-grad" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#be185d" /><stop offset="100%" stop-color="#fbcfe8" /></linearGradient>`;
+      svg.appendChild(defs);
+
+      for(let i=0; i<50; i++) {
+        const grass = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const x = Math.random() * 1000; const h = Math.random() * 100 + 30;
+        grass.setAttribute("d", `M ${x} 600 Q ${x + (Math.random()*40-20)} ${600 - h/2} ${x + (Math.random()*20-10)} ${600 - h}`);
+        grass.setAttribute("fill", "none"); grass.setAttribute("stroke", "#4a1231"); grass.setAttribute("stroke-width", 2);
+        grass.classList.add("garden-grass"); gsap.set(grass, { transformOrigin: "bottom center" });
+        svg.appendChild(grass);
+      }
+
+      for(let i=0; i<10; i++) {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const x = (1000 / 10) * i + (Math.random() * 40);
+        const tHeight = Math.random() * 250 + 150; const sTop = 600 - tHeight;
+        
+        const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        stem.setAttribute("d", `M ${x} 600 Q ${x + (Math.random()*40-20)} ${600 - tHeight/2} ${x} ${sTop}`);
+        stem.setAttribute("fill", "none"); stem.setAttribute("stroke", "#831843"); stem.setAttribute("stroke-width", "4");
+        stem.classList.add("garden-stem");
+        
+        const leafG = document.createElementNS("http://www.w3.org/2000/svg", "g"); leafG.classList.add("garden-leaf");
+        const lY = 600 - (tHeight * 0.4);
+        leafG.innerHTML = `<path d="M ${x} ${lY} Q ${x-30} ${lY+10} ${x-40} ${lY-20} Q ${x-10} ${lY-30} ${x} ${lY}" fill="#831843"/><path d="M ${x} ${lY-20} Q ${x+30} ${lY-10} ${x+40} ${lY-40} Q ${x+10} ${lY-50} ${x} ${lY-20}" fill="#831843"/>`;
+        gsap.set(leafG, { transformOrigin: `${x}px ${lY}px`, scale: 0 });
+
+        const flower = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        flower.setAttribute("transform", `translate(${x}, ${sTop})`); flower.classList.add("garden-flower", "glowing-flower");
+        flower.innerHTML = `<path d="M 0 0 C -30 -20, -50 -50, -30 -80 C -10 -60, -10 -30, 0 0 Z" fill="url(#pink-grad)"/><path d="M 0 0 C 30 -20, 50 -50, 30 -80 C 10 -60, 10 -30, 0 0 Z" fill="url(#pink-grad)"/><path d="M 0 0 C 20 -30, 20 -70, 0 -90 C -20 -70, -20 -30, 0 0 Z" fill="url(#pink-grad)"/>`;
+        gsap.set(flower, { scale: 0 });
+
+        g.appendChild(stem); g.appendChild(leafG); g.appendChild(flower);
+        gsap.set(g, { transformOrigin: `${x}px 600px` }); g.classList.add("garden-plant-group");
+        svg.appendChild(g);
+      }
+    }
+
+    // ================= 6. LOGIKA MOSAIK EKSPLOSIF =================
+    const mosaicImages = [
+      "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=300",
+      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=300",
+      "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=300",
+      "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300"
+    ];
+    
+    // Siapkan elemen foto tapi sembunyikan di tengah
+    function prepMosaicPhotos() {
+      const container = document.getElementById('mosaic-container');
+      const numPhotos = 20; // Dikurangi agar lebih renggang dan bentuk hati terlihat jelas
+      
+      for(let i=0; i<numPhotos; i++) {
+        const imgSrc = mosaicImages[i % mosaicImages.length];
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.className = 'mosaic-photo pointer-events-auto';
+        
+        // Klik untuk view foto besar
+        img.addEventListener('click', () => openLightbox(imgSrc));
+
+        // Sembunyikan tepat di tengah layar (skala 0)
+        gsap.set(img, { x: 0, y: 0, scale: 0, opacity: 0 });
+        container.appendChild(img);
+      }
+    }
+
+    document.getElementById('btn-explode').addEventListener('click', () => {
+      const photos = document.querySelectorAll('.mosaic-photo');
+      const triggerArea = document.getElementById('mosaic-trigger-area');
+      const tl = gsap.timeline();
+
+      // 1. Sembunyikan Kado
+      tl.to(triggerArea, { scale: 0, opacity: 0, duration: 0.5, ease: "back.in(1.5)" });
+
+      // 2. Berhamburan / Explode ke Acak
+      tl.to(photos, {
+        x: () => (Math.random() - 0.5) * window.innerWidth * 0.8,
+        y: () => (Math.random() - 0.5) * window.innerHeight * 0.8,
+        rotation: () => Math.random() * 360,
+        scale: 1,
+        opacity: 1,
+        duration: 1.2,
+        ease: "power3.out",
+        stagger: 0.02
+      });
+
+      // 3. Jeda sejenak untuk dinikmati efek hampurannya
+      tl.to({}, {duration: 0.5});
+
+      // 4. Bergerak membentuk Heart (Hati)
+      const numPhotos = photos.length;
+      photos.forEach((photo, i) => {
+        const t = (i / numPhotos) * Math.PI * 2;
+        // Skala koordinat hati disesuaikan agar pas dan lebih renggang
+        const scale = window.innerWidth < 600 ? 15: 25; 
+        const hX = 16 * Math.pow(Math.sin(t), 3) * scale;
+        const hY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * scale;
+
+        tl.to(photo, {
+          x: hX, y: hY, 
+          rotation: () => Math.random() * 20 - 10, // Sedikit miring alami
+          duration: 1.5,
+          ease: "back.out(1.2)"
+        }, "-=1.4"); // Jalankan bersamaan (hampir)
+      });
+    });
+
+    // ================= GALERI GOSOK & HATI MELIUK =================
+    function initScratchCards() {
+      document.querySelectorAll('.scratch-container').forEach(card => {
+        const canvas = card.querySelector('.scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        const rect = card.getBoundingClientRect();
+        canvas.width = rect.width; canvas.height = rect.height;
+
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#4a1231'); gradient.addColorStop(1, '#1a050d');
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '24px "Playfair Display", serif'; ctx.fillStyle = '#fbcfe8'; ctx.textAlign = 'center';
+        ctx.fillText("Usap Untuk Membuka", canvas.width/2, canvas.height/2);
+
+        let isDrawing = false; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.lineWidth = 40;
+        function scratch(e) {
+          if (!isDrawing) return;
+          e.preventDefault();
+          const x = (e.touches ? e.touches[0].clientX : e.clientX) - card.getBoundingClientRect().left;
+          const y = (e.touches ? e.touches[0].clientY : e.clientY) - card.getBoundingClientRect().top;
+          ctx.globalCompositeOperation = 'destination-out'; ctx.lineTo(x, y); ctx.stroke();
+        }
+        canvas.addEventListener('mousedown', e => { isDrawing = true; ctx.beginPath(); scratch(e); });
+        canvas.addEventListener('mousemove', scratch);
+        canvas.addEventListener('mouseup', () => { isDrawing = false; }); canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+        canvas.addEventListener('touchstart', e => { isDrawing = true; ctx.beginPath(); scratch(e); });
+        canvas.addEventListener('touchmove', scratch, {passive: false}); canvas.addEventListener('touchend', () => { isDrawing = false; });
+      });
+    }
+
+    function initWindingHeart() {
+      const section = document.getElementById('scratch-section');
+      const path = document.getElementById('snake-path');
+      const h = section.offsetHeight; const w = section.offsetWidth;
+      path.setAttribute('d', `M ${w/2} 0 C ${w-50} ${h*0.25} 50 ${h*0.4} ${w/2} ${h*0.6} C ${w-50} ${h*0.8} 50 ${h*0.9} ${w/2} ${h}`);
+c
+      gsap.to("#winding-heart", {
+        scrollTrigger: { trigger: "#scratch-section", start: "top center", end: "bottom bottom", scrub: 5 },
+        motionPath: { path: "#snake-path", align: "#snake-path", alignOrigin: [0.5, 0.5] }, ease: "none"
+      });
+    }
+
+    // ================= TIMELINE UTAMA =================
+    document.getElementById('btn-open').addEventListener('click', () => {
+      generateTransitionFlowers(); buildGardenSVG(); prepMosaicPhotos();
+      const overlay = document.getElementById('transition-overlay'); overlay.classList.remove('hidden');
+      const tl = gsap.timeline();
+
+      tl.to('#cover-header, #cover-guest, #cover-action', { opacity: 0, scale: 0.9, y: -30, duration: 0.5 });
+      tl.to(overlay, { backgroundColor: 'rgba(5, 2, 4, 1)', duration: 0.4 }, '-=0.3');
+      tl.to('.transition-rose', { scale: 1.8, opacity: 1, rotation: '+=45', duration: 1, stagger: { amount: 0.6, from: 'center' } }, '-=0.2');
+
+      tl.add(() => {
+        document.getElementById('cover-section').classList.add('hidden');
+        document.body.classList.remove('no-scroll');
+        document.getElementById('main-section').classList.remove('hidden');
+        window.scrollTo(0, 0);
+        playMusic(); initFireflies(); initScratchCards(); initWindingHeart();
+      });
+
+      tl.to('.transition-rose', { scale: 0.2, opacity: 0, y: '+=200', rotation: '+=90', duration: 0.8, stagger: { amount: 0.3, from: 'random' } });
+      tl.to(overlay, { backgroundColor: 'rgba(5, 2, 4, 0)', duration: 0.5 }, '-=0.5');
+      tl.add(() => { overlay.classList.add('hidden'); document.getElementById('flower-container').innerHTML = ''; });
+
+      const stems = document.querySelectorAll('.garden-stem');
+      stems.forEach(stem => { const length = stem.getTotalLength(); gsap.set(stem, { strokeDasharray: length, strokeDashoffset: length }); });
+
+      tl.to('#garden-text', { opacity: 1, y: 0, duration: 1.5, ease: "power3.out" });
+      tl.to('.garden-stem', { strokeDashoffset: 0, duration: 2, stagger: { amount: 1, from: "random" }, ease: "power2.inOut" }, "-=1");
+      tl.to('.garden-leaf', { scale: 1, duration: 1, stagger: { amount: 1, from: "random" }, ease: "back.out(1.7)" }, "-=1.5");
+      tl.to('.garden-flower', { scale: 1, duration: 1.5, stagger: { amount: 1, from: "random" }, ease: "elastic.out(1, 0.5)" }, "-=1");
+
+      tl.add(() => {
+        gsap.to('.garden-grass', { rotation: () => Math.random()*10-5, duration: () => Math.random()*2+2, yoyo: true, repeat: -1, ease: "sine.inOut" });
+        gsap.to('.garden-plant-group', { rotation: () => Math.random()*6-3, duration: () => Math.random()*3+3, yoyo: true, repeat: -1, ease: "sine.inOut" });
+      });
+
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+    });
+
+  </script>
+</body>
+</html>
+
+```
