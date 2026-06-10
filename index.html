@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -215,21 +214,21 @@
       <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#050204] to-transparent z-20"></div>
     </section>
 
-    <section id="mosaic-section" class="relative w-full min-h-screen lg:h-screen flex flex-col items-center justify-center z-20 py-12 lg:py-20 overflow-hidden">
-      
-      <div id="mosaic-trigger-area" class="z-30 text-center flex flex-col items-center justify-center transition-all duration-500">
-        <h3 class="font-serif-lux text-3xl text-pink-300 mb-8">Ada Sesuatu Untukmu...</h3>
-        <div id="btn-explode" class="relative animate-gift-shake gift-glow cursor-pointer hover:scale-110 transition-transform duration-300">
-          <div class="bg-gradient-to-br from-[#831843] to-[#4a044e] p-6 rounded-full shadow-2xl border border-pink-400/50 text-white">
-            <i data-lucide="package-open" class="w-10 h-10"></i>
-          </div>
-          <p class="text-[10px] text-pink-300 mt-4 font-semibold tracking-[0.2em] uppercase animate-pulse">Buka Hati Ini</p>
-        </div>
+   <section id="mosaic-section" class="relative w-full min-h-screen lg:h-screen flex flex-col items-center justify-center z-20 pt-0 py-12 lg:py-20 overflow-hidden">
+  
+  <div id="mosaic-trigger-area" class="w-full h-[500px] z-30 text-center flex flex-col items-center justify-center transition-all duration-500">
+    <h3 class="font-serif-lux text-3xl text-pink-300 mb-8">Ada Sesuatu Untukmu...</h3>
+    <div id="btn-explode" class="relative animate-gift-shake gift-glow cursor-pointer hover:scale-110 transition-transform duration-300">
+      <div class="bg-gradient-to-br from-[#831843] to-[#4a044e] p-6 rounded-full shadow-2xl border border-pink-400/50 text-white">
+        <i data-lucide="package-open" class="w-10 h-10"></i>
       </div>
+      <p class="text-[10px] text-pink-300 mt-4 font-semibold tracking-[0.2em] uppercase animate-pulse">Buka Hati Ini</p>
+    </div>
+  </div>
 
-      <div id="mosaic-container" class="absolute inset-0 w-full h-full pointer-events-none flex items-center justify-center z-20">
-        </div>
-    </section>
+  <div id="mosaic-container" class="absolute inset-0 w-full h-full pointer-events-none flex items-center justify-center z-20">
+    </div>
+</section>
 
     <section id="scratch-section" class="relative w-full max-w-4xl mx-auto px-4 lg:px-6 py-20 lg:py-32 z-20">
       <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="motion-path-svg">
@@ -281,16 +280,15 @@
     function openLightbox(imgSrc) {
       lightboxImg.src = imgSrc;
       lightbox.classList.remove('hidden');
-      // Fade in effect
       setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
-      document.body.style.overflow = 'hidden'; // Kunci scroll saat foto terbuka
+      document.body.style.overflow = 'hidden'; 
     }
 
     lightbox.addEventListener('click', () => {
       lightbox.classList.add('opacity-0');
       setTimeout(() => { 
         lightbox.classList.add('hidden'); 
-        document.body.style.overflow = 'auto'; // Buka scroll kembali
+        document.body.style.overflow = 'auto'; 
       }, 300);
     });
 
@@ -434,10 +432,9 @@
       "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300"
     ];
     
-    // Siapkan elemen foto tapi sembunyikan di tengah
     function prepMosaicPhotos() {
       const container = document.getElementById('mosaic-container');
-      const numPhotos = 20; // Dikurangi agar lebih renggang dan bentuk hati terlihat jelas
+      const numPhotos = 20; 
       
       for(let i=0; i<numPhotos; i++) {
         const imgSrc = mosaicImages[i % mosaicImages.length];
@@ -445,10 +442,8 @@
         img.src = imgSrc;
         img.className = 'mosaic-photo pointer-events-auto';
         
-        // Klik untuk view foto besar
         img.addEventListener('click', () => openLightbox(imgSrc));
 
-        // Sembunyikan tepat di tengah layar (skala 0)
         gsap.set(img, { x: 0, y: 0, scale: 0, opacity: 0 });
         container.appendChild(img);
       }
@@ -462,7 +457,7 @@
       // 1. Sembunyikan Kado
       tl.to(triggerArea, { scale: 0, opacity: 0, duration: 0.5, ease: "back.in(1.5)" });
 
-      // 2. Berhamburan / Explode ke Acak
+      // 2. Berhamburan
       tl.to(photos, {
         x: () => (Math.random() - 0.5) * window.innerWidth * 0.8,
         y: () => (Math.random() - 0.5) * window.innerHeight * 0.8,
@@ -474,46 +469,53 @@
         stagger: 0.02
       });
 
-      // 3. Jeda sejenak untuk dinikmati efek hampurannya
+      // 3. Jeda sejenak
       tl.to({}, {duration: 0.5});
 
-      // 4. Bergerak membentuk Heart (Hati) - AREA VERTIKAL DIPERLUAS (STRETCH)
+      // 4. Bergerak membentuk Heart - AREA DIPERLUAS & DIGESER KE BAWAH
       const numPhotos = photos.length;
       const vw = window.innerWidth;
       
       let heartScale;
-      let verticalStretch; // Variabel baru untuk meluaskan ruang atas-bawah
+      let verticalStretch; 
+      let offsetY; // Ditambahkan agar bentuk tidak nabrak ke atas layar saat diregangkan
 
-      // Atur skala dan tingkat kelonggaran atas-bawah berdasarkan layar
+      // Penyesuaian Ruang berdasarkan Ukuran Layar
       if (vw < 380) {
         heartScale = 5;  
-        verticalStretch = 1.2; // Melar 20% ke atas & bawah di HP kecil
+        verticalStretch = 1.3; 
+        offsetY = 40; 
       } else if (vw < 600) {
         heartScale = 10; 
-        verticalStretch = 1.3; // Melar 30%
+        verticalStretch = 1.4; 
+        offsetY = 70; 
       } else if (vw < 1024) {
         heartScale = 13; 
-        verticalStretch = 1.4; // Melar 40%
+        verticalStretch = 1.5; 
+        offsetY = 120; 
       } else {
         heartScale = 20; 
-        verticalStretch = 1.5; // Melar 50% di desktop agar area foto sangat luas
+        verticalStretch = 1.6; // Melar 60% ke atas dan bawah
+        offsetY = 180; // Dorong ke bawah 180px agar puncaknya tidak terpotong
       }
       
       photos.forEach((photo, i) => {
         const t = (i / numPhotos) * Math.PI * 2;
         
-        // Posisi X tetap konstan sesuai bentuk hati asli
         const hX = 16 * Math.pow(Math.sin(t), 3) * heartScale;
         
-        // Posisi Y dikalikan dengan verticalStretch agar bentuk hati meluaskan areanya ke atas dan ke bawah
-        const hY = (-(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * heartScale) * verticalStretch;
+        // Kalkulasi posisi Y asli
+        const baseHY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * heartScale;
+        
+        // Gabungkan tarikan (stretch) dan dorongan (offset)
+        const hY = (baseHY * verticalStretch) + offsetY;
 
-        // Ditambah sedikit gap acak mikro antar foto agar sebarannya lebih alami
-        const microGapY = (Math.random() - 0.5) * 20; 
+        // Gap / Spasi acak antar foto yang lebih besar (hingga 50px) agar sangat renggang
+        const spaciousGapY = (Math.random() - 0.5) * 50; 
 
         tl.to(photo, {
           x: hX, 
-          y: hY + microGapY, 
+          y: hY + spaciousGapY, 
           rotation: () => Math.random() * 20 - 10, 
           duration: 1.5,
           ease: "back.out(1.2)"
@@ -610,5 +612,3 @@
   </script>
 </body>
 </html>
-
-```
